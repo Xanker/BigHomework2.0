@@ -64,7 +64,7 @@ public class FruitDAO extends ProductDAO<Fruit> {
 
     public boolean update1(Fruit fruit) throws SQLException {
 
-        String url1 = "UPDATE fruit SET color = ? ,weight = ?, unit = ?, origin = ?, ripeness = ? , pMonth = ?, purchday = ?,purchday = ?WHERE id = ?";
+        String url1 = "UPDATE fruit SET color = ? ,weight = ?, unit = ?, origin = ?, ripeness = ? ,purchday = ? ,unitPrice = ?,totalPrice = ? WHERE id = ?";
         PreparedStatement ps = connection.prepareStatement(url1);
 
 

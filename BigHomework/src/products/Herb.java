@@ -111,4 +111,8 @@ public class Herb extends Product {
     public void setStock(int stock) {
         this.stock = stock;
     }
+
+    public void setPurchday(LocalDate newDate) {
+        this.date = newDate;
+    }
 }

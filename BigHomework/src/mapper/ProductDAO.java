@@ -23,7 +23,7 @@ public abstract class ProductDAO<T extends Product> {
         ps.setInt(1, product.getID());
         ps.setString(2, product.getName());
         ps.setString(3, product.getType());
-        ps.setDouble(4, product.getprice());
+        ps.setDouble(4, product.getunitprice());
         ps.setString(5, product.getDescription());
         ps.setDate(6,Date.valueOf(product.getDate()));
         ps.setInt(7, product.getStock()); // 初始库存为0

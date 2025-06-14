@@ -56,7 +56,7 @@ public class HerbDAO extends ProductDAO<Herb> {
     }
 
     // 更新herb表的单独方法
-    private boolean updateHerbTable(Herb herb) throws SQLException {
+    public boolean updateHerbTable(Herb herb) throws SQLException {
         String sql = "UPDATE herb SET name = ?, origin = ?, pSeason = ?, pMonth = ?,  property = ?, stock = ? WHERE id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
