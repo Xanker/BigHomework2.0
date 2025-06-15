@@ -7,9 +7,9 @@ import java.util.Scanner;
 
 import mapper.FruitDAO;
 import mapper.HerbDAO;
-import mapper.ProductDAO;
 import mapper.WoodDAO;
 import products.*;
+import ui.LoginUI;
 
 
 public class Main {
@@ -20,16 +20,20 @@ public class Main {
 
     private static Scanner scanner = new Scanner(System.in);
 
-
     // 正确的 main 方法签名
     public static void main(String[] args) throws SQLException {
 
+        LoginUI.showLogin();
 
-        LocalDate purchdate = LocalDate.of(2024, 1, 1);
-        FruitDAO fruitDAO = new FruitDAO();
-        Fruit fruit = new Fruit("jjj", 2, "红色", 2, "1", "si", purchdate, 4);
-        //fruitDAO.insert(fruit);
-        inventory.setProducts(fruitDAO.loadProductTable());
+        // 测试购物车（先模拟添加商品）
+        //ShoppingCart cart = new ShoppingCart();
+       // Fruit apple = new Fruit("苹果", 101, "红色", 2.5, "斤",
+                //"山东烟台", LocalDate.of(2001,4,2), 8.0);
+       // cart.addProduct(apple, 2);
+       // ShoppingCartUI.showCartUI(cart);
+
+
+        updateData();
         while (true) {
             System.out.println("\n==== 农产品库存管理系统 ====");
             System.out.println("0. 添加产品");
@@ -38,6 +42,8 @@ public class Main {
             System.out.println("3. 查看各类产品所有产品");
             System.out.println("4. 修改数据");
             System.out.println("5. 退出");
+            System.out.println("6. 删除");
+            System.out.println("7. 查找");
             System.out.print("请选择操作: ");
 
             int choice = Integer.parseInt(scanner.nextLine());
@@ -45,6 +51,7 @@ public class Main {
             switch (choice) {
                 case 0:
                     addProduct();
+                    updateData();
                     break;
                 case 1:
                     System.out.println("木头有:" + inventory.getWoodStock() + '\n');
@@ -54,6 +61,7 @@ public class Main {
                     break;
                 case 2:
                     sellProduct();
+                    updateData();
                     break;
                 case 3:
                     System.out.println(inventory.getAllProducts() + "\n");
@@ -61,15 +69,45 @@ public class Main {
                 case 4:
                     Change();
                     break;
+                case 6:
+                    Deleted();
+                case 7:
+                    Find();
+
                 case 5:
-                    System.out.println("感谢使用，再见！");
                     scanner.close();
+                    System.out.println("感谢使用，再见！");
                     return; // 退出程序
 
             }
         }
     }
 
+    private static void Find() throws SQLException {
+        System.out.println("请输入产品类型（水果/树木/草药）:");
+        String productType = scanner.nextLine();
+
+        switch (productType) {
+            case"wood":
+                System.out.println("输入id");
+                int id = Integer.parseInt(scanner.nextLine());
+                if (inventory.findbyID(id,"Wood")) {
+                    System.out.println(inventory.getWood(id));
+                }
+            case "herb":
+                System.out.println("输入id");
+                int id1 = Integer.parseInt(scanner.nextLine());
+                if (inventory.findbyID(id1,"Herb")) {
+                    System.out.println(inventory.getHerb(id1));
+                }
+            case"Fruit":
+                System.out.println("输入id");
+                int id2 = Integer.parseInt(scanner.nextLine());
+                if (inventory.findbyID(id2,"Fruit")) {
+                    System.out.println(inventory.getFruit(id2));
+                }
+        }
+    }
     // 商品添加方法
     private static void addProduct() throws SQLException {
         System.out.println("请输入产品类型（水果/树木/草药）:");
@@ -102,6 +140,11 @@ public class Main {
 
         System.out.println("ID:");
         int id = Integer.parseInt(scanner.nextLine()); // 避免换行符问题
+        if(!inventory.findbyID(id,"Wood"))
+        {
+            System.out.println("ID重复，请重新输入");
+            return;
+        }
 
         System.out.println("价格：");
         int price = Integer.parseInt(scanner.nextLine());
@@ -129,7 +172,10 @@ public class Main {
         System.out.println("Stock?0");
         Integer inn = Integer.parseInt(scanner.nextLine());
         Wood wood = new Wood(name, id, price, length, width, thickness, date, in, inn);
+
         inventory.Add(wood, wood.getStock());
+        WoodDAO woodDAO = new WoodDAO();
+        woodDAO.insert(wood);
 
         System.out.println("添加成功！\n" + inventory.getWood(wood.getID()) + "\t" + inventory.getWoodStock());
         System.out.println(inventory.getWood(wood.getID()).getWaterness());
@@ -142,6 +188,11 @@ public class Main {
         System.out.println("ID:");
         int ID = Integer.parseInt(scanner.nextLine()); // 避免换行符问题
 
+        if(!inventory.findbyID(ID,"Fruit"))
+        {
+            System.out.println("ID重复，请重新输入");
+            return;
+        }
 
         System.out.println("颜色:");
         String color = scanner.nextLine();
@@ -182,6 +233,11 @@ public class Main {
         System.out.println("ID:");
         int ID = Integer.parseInt(scanner.nextLine()); // 避免换行符问题
 
+        if(!inventory.findbyID(ID,"Herb"))
+        {
+            System.out.println("ID重复，请重新输入");
+            return;
+        }
 
         System.out.println("采摘季节:");
         String pSeason = scanner.nextLine();
@@ -208,9 +264,8 @@ public class Main {
         int stock = Integer.parseInt(scanner.nextLine());
         Herb herb = new Herb(name, ID, origin, pSeason, property, date1, price, stock);
 
-        inventory.Add(herb, 2);
+        inventory.Add(herb, herb.getStock());
         System.out.println("添加成功！\n" + inventory.getHerb(herb.getID()) + "\t" + inventory.getHerbStock());
-        System.out.println("保存方法为:" + inventory.getHerb(herb.getID()).preserve());
         HerbDAO herbDAO = new HerbDAO();
         herbDAO.insert(herb);
     }
@@ -244,15 +299,15 @@ public class Main {
     }
 
     private static void sellWood(int ID) throws SQLException {
-        inventory.sell(ID, 1);//需要对getWood进行修改？？
+        inventory.sell(ID, 1,"Wood");//需要对getWood进行修改？？
     }
 
     private static void sellFruit(int id) throws SQLException {
-        inventory.sell(id, 1);
+        inventory.sell(id, 1,"Fruit");
     }
 
     private static void sellHerb(int id) throws SQLException {
-        inventory.sell(id, 1);
+        inventory.sell(id, 1,"Herb");
     }
 
 
@@ -290,7 +345,8 @@ public class Main {
         if (wood != null) {
             System.out.println("请输入新的树木名称（不修改请直接回车）:");
             String newName = scanner.nextLine();
-            if (!newName.isEmpty()) {
+            if (!newName.isEmpty())
+            {
                 wood.setName(newName);
             }
 
@@ -311,14 +367,26 @@ public class Main {
             System.out.println("请输入新的厚度（不修改请直接回车）:");
             String newThicknessStr = scanner.nextLine();
             if (!newThicknessStr.isEmpty()) {
-                double newThickness = Double.parseDouble(newThicknessStr);
-                wood.setThickness(newThickness);
-            }
 
+                wood.setThickness(Double.parseDouble(newThicknessStr));
+            }
+            System.out.println("请输入新的数量（不修改请直接回车）:");
+            int stock = Integer.parseInt(scanner.nextLine());
+            if (!newThicknessStr.isEmpty()) {
+
+                wood.setStock(stock);
+                inventory.UpdateCount(wood, stock);
+            }
             System.out.println("请输入新的产地（不修改请直接回车）:");
             String newOrigin = scanner.nextLine();
             if (!newOrigin.isEmpty()) {
                 wood.setOrigin(newOrigin);
+            }
+            System.out.println("请输入新的价格:");
+           String newPrice = scanner.nextLine();
+            if (!newPrice.isEmpty()) {
+                Double newPrice1 = Double.parseDouble(newPrice);
+                wood.setunitprice(newPrice1);
             }
 
             if (woodDAO.update(wood)) {
@@ -353,6 +421,7 @@ public class Main {
             if (!newWeightStr.isEmpty()) {
                 double newWeight = Double.parseDouble(newWeightStr);
                 fruit.setWeight(newWeight);
+                inventory.UpdateCount( inventory.getFruit(id), (int) newWeight);
             }
 
             System.out.println("请输入新的单位（不修改请直接回车）:");
@@ -379,10 +448,12 @@ public class Main {
             if (!newUnitPriceStr.isEmpty()) {
                 double newUnitPrice = Double.parseDouble(newUnitPriceStr);
                 fruit.setUnitPrice(newUnitPrice);
+
             }
 
-            if (fruitDAO.update(fruit)) {
+            if (fruitDAO.update(inventory.getFruit(id))) {
                 System.out.println("水果数据修改成功！");
+
             } else {
                 System.out.println("水果数据修改失败！");
             }
@@ -400,18 +471,19 @@ public class Main {
             String newName = scanner.nextLine();
             if (!newName.isEmpty()) {
                 herb.setHerbname(newName);
+                herb.setName(newName);
             }
 
             System.out.println("请输入新的产地（不修改请直接回车）:");
             String newOrigin = scanner.nextLine();
-            if (!newOrigin.isEmpty()) {
+            if (!newOrigin.isEmpty()) { // 仅当输入非空字符串时更新
                 herb.setOrigin(newOrigin);
             }
 
             System.out.println("请输入新的采摘季节（不修改请直接回车）:");
-            String newSeason = scanner.nextLine();
-            if (!newSeason.isEmpty()) {
-                herb.setSeason(newSeason);
+            String newpSeason = scanner.nextLine();
+            if (!newpSeason.isEmpty()) {
+                herb.setSeason(newpSeason);
             }
 
             System.out.println("请输入新的性质（不修改请直接回车）:");
@@ -431,7 +503,7 @@ public class Main {
             String newPriceStr = scanner.nextLine();
             if (!newPriceStr.isEmpty()) {
                 double newPrice = Double.parseDouble(newPriceStr);
-                herb.setUnitprice(newPrice);
+                herb.setUnitPrice(newPrice);
             }
 
             System.out.println("请输入新的数量（不修改请直接回车）:");
@@ -439,15 +511,82 @@ public class Main {
             if (!newStockStr.isEmpty()) {
                 int newStock = Integer.parseInt(newStockStr);
                 herb.setStock(newStock);
+                inventory.UpdateCount( inventory.getHerb(id), newStock);
             }
 
-            if (herbDAO.updateHerbTable(herb)) {
+            if (herbDAO.update(inventory.getHerb(id))) {
                 System.out.println("草药数据修改成功！");
+
+
             } else {
                 System.out.println("草药数据修改失败！");
             }
         } else {
             System.out.println("未找到对应的草药产品！");
         }
+    }
+
+    /// 删除功能
+    public static void deleteHerb(int id, String str) throws SQLException {
+        switch (str)
+        {
+            case "Fruit":
+                inventory.delete(id,str);
+                FruitDAO fruitDAO = new FruitDAO();
+                fruitDAO.delete(id);
+            case "Herb":
+                inventory.delete(id,str);
+                HerbDAO herbDAO = new HerbDAO();
+                herbDAO.delete(id);
+            case "Wood":
+                inventory.delete(id,str);
+                WoodDAO woodDAO = new WoodDAO();
+                woodDAO.delete(id);
+        }
+
+    }
+    public static void updateData() throws SQLException
+    {
+        FruitDAO fruitDAO = new FruitDAO();
+        WoodDAO woodDAO = new WoodDAO();
+        HerbDAO herbDAO = new HerbDAO();
+        //fruitDAO.insert(fruit);
+        inventory.setProducts(fruitDAO.loadProductTable());
+        inventory.setProducts(woodDAO.loadProductTable());
+        inventory.setProducts(herbDAO.loadProductTable());
+    }
+    private static void Deleted() throws SQLException {
+        System.out.println("请输入你要删除的数据类型");
+        System.out.println("请输入产品类型（水果/树木/草药）:");
+        String productType = scanner.nextLine();
+
+        switch (productType) {
+            case "树木":
+                System.out.println("输入id \n");
+                int id = Integer.parseInt(scanner.nextLine());
+                deleteHerb(id,"Wood");
+                int num = 0;
+
+                break;
+            case "水果":
+                // 添加水果逻辑
+                System.out.println("输入id \n");
+                int id1 = Integer.parseInt(scanner.nextLine());
+                deleteHerb(id1,"Fruit");
+
+                break;
+            case "草药":
+                // 添加草药逻辑
+                System.out.println("输入id \n");
+                int id2 = Integer.parseInt(scanner.nextLine());
+                deleteHerb(id2,"Herb");
+                break;
+            default:
+                System.out.println("不支持的产品类型");
+                break;
+        }
+
+
+
     }
 }

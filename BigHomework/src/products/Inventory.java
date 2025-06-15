@@ -1,13 +1,11 @@
 package products;
-import mapper.FruitDAO;
-import mapper.HerbDAO;
-import mapper.ProductDAO;
-import mapper.WoodDAO;
+import mapper.*;
 import products.Fruit;
 import products.Herb;
 import products.Product;
 import products.Wood;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.sql.SQLException;
@@ -25,22 +23,85 @@ public class Inventory <T extends Product>{
     }
 
     //sell(销售)
-    public void sell(int id, int count) throws SQLException {
-        Fruit wood =getFruit(id);
-        if(productsCount.getOrDefault(wood, 0) >= count)
-        {
-            productsCount.put((T) wood, productsCount.get(wood) - count);
-            if(productsCount.get(wood) == 0) {
-                products.remove(wood);
-                productsCount.remove(wood);
+    public void sell(int id, int count,String type) throws SQLException {
+
+        switch (type) {
+            case "Fruit": {
+                Fruit wood = getFruit(id);
+                if (wood == null) {
+                    break;
+                }
+                if (productsCount.getOrDefault(wood, 0) >= count) {
+                    productsCount.put((T) wood, productsCount.get(wood) - count);
+                    if (productsCount.get(wood) == 0) {
+                        products.remove(wood);
+                        productsCount.remove(wood);
+                    }
+                    // 更新数据库中的库存数量
+                    updateStockInDB((T) wood, productsCount.getOrDefault(wood, 0));
+
+                    SalesRecord salesRecord = new SalesRecord(LocalDate.now(), 123, wood, count, wood.getUnitPrice());
+                    SalesRecordDAO salesRecordDAO = new SalesRecordDAO();
+                    salesRecordDAO.insertSalesRecord(salesRecord);
+                } else {
+                    System.out.println("产品数量不足");
+                }
             }
-            // 更新数据库中的库存数量
-            updateStockInDB((T) wood, productsCount.getOrDefault(wood, 0));
+                case "Herb":{
+                    Herb herb = getHerb(id);
+                    if(herb == null){
+                        break;
+                    }
+
+                    if (productsCount.getOrDefault(herb, 0) >= count)
+                    {
+                        productsCount.put((T) herb, productsCount.get(herb) - count);
+                        if (productsCount.get(herb) == 0) {
+                            products.remove(herb);
+                            productsCount.remove(herb);
+                        }
+                        // 更新数据库中的库存数量
+                        updateStockInDB((T) herb, productsCount.getOrDefault(herb, 0));
+
+                        SalesRecord salesRecord = new SalesRecord(LocalDate.now(), 123, herb, count, herb.getUnitPrice());
+                        SalesRecordDAO salesRecordDAO = new SalesRecordDAO();
+                        salesRecordDAO.insertSalesRecord(salesRecord);
+                    }
+                    else
+                    {
+                        System.out.println("产品数量不足");
+                    }
+
+                }
+                case "Wood":{
+                    Wood wood = getWood(id);
+                    if (wood == null) {
+                        System.out.println("查无此产品");
+                        break;
+                    }
+                    if (productsCount.getOrDefault(wood, 0) >= count)
+                    {
+                        productsCount.put((T) wood, productsCount.get(wood) - count);
+                        if (productsCount.get(wood) == 0) {
+                            products.remove(wood);
+                            productsCount.remove(wood);
+                        }
+                        // 更新数据库中的库存数量
+                        updateStockInDB((T) wood, productsCount.getOrDefault(wood, 0));
+
+                        SalesRecord salesRecord = new SalesRecord(LocalDate.now(), 123, wood, count, wood.getUnitPrice());
+                        SalesRecordDAO salesRecordDAO = new SalesRecordDAO();
+                        salesRecordDAO.insertSalesRecord(salesRecord);
+                    }
+                    else
+                    {
+                        System.out.println("产品数量不足");
+                    }
+                }
+
+
         }
-        else
-        {
-            System.out.println("产品数量不足");
-        }
+
     }
 
     //Check（库存查询）
@@ -148,4 +209,34 @@ public class Inventory <T extends Product>{
         }
         return null;
     }
+    public boolean findbyID(int id,String str) throws SQLException
+    {
+        switch (str) {
+            case "Wood":
+                if(getWood(id) != null);
+                return true;
+                case "Herb":
+                    if(getHerb(id) != null);
+                    return true;
+                    case "Fruit":
+                        if(getFruit(id) != null);
+                        return true;
+        }
+        return false;
+    }
+    public void delete(int id ,String str) throws SQLException {
+        switch (str) {
+            case "Wood":
+                productsCount.remove(findbyID(id, str));
+            case "Herb":
+                productsCount.remove(findbyID(id, str));
+            case "Fruit":
+                products.remove(findbyID(id, str));
+        }
+
+
+
+
+    }
+
 }

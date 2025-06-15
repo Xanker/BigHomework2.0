@@ -35,7 +35,8 @@ public abstract class ProductDAO<T extends Product> {
     public ArrayList<Product> loadProductTable() throws SQLException {
         String sql = "SELECT * FROM product p " +
                 "LEFT JOIN fruit f on f.id = p.id " +
-                "LEFT JOIN wood w ON w.id = p.id ";
+                "LEFT JOIN wood w ON w.id = p.id " +
+                "LEFT JOIN herb d ON d.id = f.id ";
 
         PreparedStatement ps = connection.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
@@ -64,7 +65,6 @@ public abstract class ProductDAO<T extends Product> {
                     productsCount.put((T) fruit, stock);
                 }
                 case "Wood" -> {
-                    String color = rs.getString("color");
                     double length = rs.getDouble("length");
                     double width = rs.getDouble("width");
                     double thickness = rs.getDouble("height");
@@ -79,7 +79,6 @@ public abstract class ProductDAO<T extends Product> {
                     String origin = rs.getString("origin");
                     String pSeason = rs.getString("pSeason");
                     String property = rs.getString("property");
-                    int pMonth = rs.getInt("pMonth");
                     LocalDate purchdate = rs.getDate("purchday").toLocalDate();
                     Herb herb = new Herb(name,id,origin,pSeason,property,purchdate,price,stock);
                     products.add(herb);
@@ -95,6 +94,19 @@ public abstract class ProductDAO<T extends Product> {
     public abstract void insert(T product) throws SQLException;
 
     public abstract boolean update(T product) throws SQLException;
+
+    public boolean delete(int id) throws SQLException{
+        String sql = "DELETE FROM product WHERE id = ?";
+       try(PreparedStatement ps = connection.prepareStatement(sql))
+       {
+           ps.setInt(1, id);
+           ps.executeUpdate();
+           return true;
+       }catch (SQLException e) {
+           return false;
+       }
+
+    }
 
     public void updateStock(T product, int count) throws SQLException
     {
@@ -114,15 +126,17 @@ public abstract class ProductDAO<T extends Product> {
         }
         else if(product.getType().equals("Wood"))
         {
-            String sql1 = "UPDATE wood SET weight = ? WHERE id = ?";
+            String sql1 = "UPDATE wood SET stock = ? WHERE id = ?";
             PreparedStatement ps1 = connection.prepareStatement(sql1);
             ps1.setInt(1, count);
             ps1.setInt(2, product.getID());
+            ps1.executeUpdate();
         } else if (product.getType().equals("Herb")) {
-            String sql1 = "UPDATE herb SET weight = ? WHERE id = ?";
+            String sql1 = "UPDATE herb SET stock = ? WHERE id = ?";
             PreparedStatement ps1 = connection.prepareStatement(sql1);
             ps1.setInt(1, count);
-
+            ps1.setInt(2, product.getID());
+            ps1.executeUpdate();
         }
         checkStock(product.getID());
 
@@ -135,8 +149,6 @@ public abstract class ProductDAO<T extends Product> {
         PreparedStatement ps = connection.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
 
-        ArrayList<Product> products = new ArrayList<>();
-        HashMap<T, Integer> productsCount = new HashMap<>();
         while (rs.next()) {
             //Product表
 
@@ -148,8 +160,6 @@ public abstract class ProductDAO<T extends Product> {
                 ps1.setInt(1, id);
                 ps1.executeUpdate();
             }
-
-
 
         }
         ps.close();

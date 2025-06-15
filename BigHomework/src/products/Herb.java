@@ -11,7 +11,8 @@ public class Herb extends Product {
     private String  property;
     private LocalDate date;
     private int stock;
-
+    private double totalPrice;
+    private double unitPrice;
     // 构造函数、getter和setter方法、glow()方法
     public Herb(String Herbname, int id, String Origin, String pSeason,  String property,LocalDate date,double price,int stock) {
         this.Herbname = Herbname;
@@ -22,15 +23,19 @@ public class Herb extends Product {
         this.property = property;
         this.date = date;
         this.stock = stock;
-        super.setUnitprice(price);
-        super.setTotalpricePrice(stock*price);
+        unitPrice = price;
+        super.setUnitprice(unitPrice);
         super.setDate(this.date);
+        super.setName(this.Herbname);
         setType();
         super.setStock(stock);
+        calculate();
+
 
     }
 
     private void calculate() {
+        totalPrice = stock * unitPrice;
     }
 
     //  getter方法
@@ -63,9 +68,6 @@ public class Herb extends Product {
     public void setSeason(String pSeason){
         this.pSeason = pSeason;
     }
-    public void setMonth(int pMonth){
-        this.pMonth = pMonth;
-    }
     public void setProperty(String property){
         this.property = property;
     }
@@ -78,19 +80,19 @@ public class Herb extends Product {
          {
              case "寒性":
 
-                 String str1 = "存放于温度≤18℃、湿度≤50%的环境中，避免厨房、阳台等湿热或阳光直射区域";
+                 String str1 = "冷藏";
                  super.setDescription(str1);
                  return str1;
              case "凉性":
-                 String str2 =  "存放于温度≤20℃、湿度≤60%的环境中，避免厨房、阳台等潮湿或阳光直射区域";
+                 String str2 =  "冷藏";
                  super.setDescription(str2);
                  return str2;
              case "热性":
-                 String str3 =  "存放于温度≤27℃、湿度≤50%的干燥环境中，远离热源（如厨房、暖气）和阳光直射";
+                 String str3 =  "常温无光";
                  super.setDescription(str3);
                  return str3;
              case "温性":
-                 String str4 =  "存放于温度≤25℃、湿度≤60%的环境中，避免厨房、阳台等湿热或阳光直射区域";
+                 String str4 =  "常温无光";
                  super.setDescription(str4);
                  return str4;
 
@@ -110,9 +112,25 @@ public class Herb extends Product {
     }
     public void setStock(int stock) {
         this.stock = stock;
+        super.setStock(stock);
+        calculate();
     }
 
     public void setPurchday(LocalDate newDate) {
         this.date = newDate;
+        pMonth = newDate.getMonthValue();
+    }
+
+
+    public double getUnitPrice() {
+        return unitPrice;
+    }
+    public double getTotalPrice() {
+        calculate();
+        return totalPrice;
+    }
+
+    public void setUnitPrice(double newPrice) {
+        this.unitPrice = newPrice;
     }
 }

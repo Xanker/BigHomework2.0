@@ -14,16 +14,17 @@ public class HerbDAO extends ProductDAO<Herb> {
     public void insert(Herb herb) throws SQLException {
         insertProductTable(herb);
 
-        String sql = "insert into herb values(id,name,origin,pSeason,pMonth,property,TotalPrice, stock)values(?,?,?,?,?,?,?,?)";
+        String sql = "insert into herb(id, name, origin, pSeason, pMonth,purchday, property,TotalPrice,stock) values(?,?,?,?,?,?,?,?,?)";
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setInt(1,herb.getID());
         ps.setString(2,herb.getName());
         ps.setString(3,herb.getOrigin());
         ps.setString(4,herb.getSeason());
         ps.setInt(5,herb.getMonth());
-        ps.setString(6,herb.getProperty());
-        ps.setDouble(7,herb.getTotalPrice());
-        ps.setInt(8, 0); // 初始库存为0
+        ps.setDate(6,Date.valueOf(herb.getPurchday()));
+        ps.setString(7,herb.getProperty());
+        ps.setDouble(8,herb.getTotalPrice());
+        ps.setInt(9, herb.getStock()); // 初始库存为0
         ps.executeUpdate();
         ps.close();
     }
@@ -45,9 +46,9 @@ public class HerbDAO extends ProductDAO<Herb> {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, herb.getName());
             ps.setString(2, herb.getType());
-            ps.setDouble(3, herb.getTotalPrice());
+            ps.setDouble(3, herb.getUnitPrice());
             ps.setString(4, herb.getDescription());
-            ps.setInt(5, getStock(herb));
+            ps.setInt(5, herb.getStock());
             ps.setInt(6, herb.getID());
 
             int rowsAffected = ps.executeUpdate();
@@ -57,7 +58,7 @@ public class HerbDAO extends ProductDAO<Herb> {
 
     // 更新herb表的单独方法
     public boolean updateHerbTable(Herb herb) throws SQLException {
-        String sql = "UPDATE herb SET name = ?, origin = ?, pSeason = ?, pMonth = ?,  property = ?, stock = ? WHERE id = ?";
+        String sql = "UPDATE herb SET name = ?, origin = ?, pSeason = ?, pMonth = ?, purchday = ?,  property = ?,totalprice = ?, stock = ? WHERE id = ?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, herb.getName());
@@ -66,16 +67,14 @@ public class HerbDAO extends ProductDAO<Herb> {
             ps.setInt(4, herb.getMonth());
             ps.setDate(5, Date.valueOf(herb.getPurchday()));
             ps.setString(6, herb.getProperty());
-            ps.setInt(7, getStock(herb));
-            ps.setInt(8, herb.getID());
+            ps.setDouble(7, herb.getTotalPrice());
+            ps.setDouble(8, herb.getStock());
+            ps.setInt(9, herb.getID());
 
             int rowsAffected = ps.executeUpdate();
             return rowsAffected > 0;
         }
     }
 
-    private int getStock(Herb herb) {
-        // 这里需要从 Inventory 中获取库存数量
-        return 0; // 暂时返回0，需要根据实际情况修改
-    }
+
 }

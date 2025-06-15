@@ -6,7 +6,6 @@ import java.time.LocalDate;
 public abstract class Product {
     private String name;
     private String type;
-    private double Totalprice;
     private String description;
     private int ID;
     private LocalDate date;
@@ -41,10 +40,6 @@ public abstract class Product {
     {
         this.type = type;
     }
-    public void setTotalpricePrice(double price)
-    {
-        this.Totalprice = price;
-    }
     public String getDescription()
     {
         return description;
@@ -54,9 +49,7 @@ public abstract class Product {
         this.description = description;
     }
 
-    public double getTotalPrice() {
-        return Totalprice;
-    }
+
     public void setDate(LocalDate date) {
         this.date = date;
     }

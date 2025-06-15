@@ -54,7 +54,7 @@ public class FruitDAO extends ProductDAO<Fruit> {
             ps.setString(2, fruit.getType());
             ps.setDouble(3, fruit.getTotalPrice());
             ps.setString(4, fruit.getDescription());
-            ps.setInt(5, getStock(fruit));
+            ps.setInt(5, fruit.getStock());
             ps.setInt(6, fruit.getID());
 
             int rowsAffected = ps.executeUpdate();
@@ -121,4 +121,5 @@ public class FruitDAO extends ProductDAO<Fruit> {
         // 这里需要从 Inventory 中获取库存数量
         return 0; // 暂时返回0，需要根据实际情况修改
     }
+
 }

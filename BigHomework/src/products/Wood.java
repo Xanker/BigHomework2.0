@@ -12,12 +12,16 @@ public class Wood extends Product {
     private double Waterness;
     private String origin;
     private LocalDate date;
+    private double unitprice;
+    private double totalprice;
+    private int stock;
 
     // 构造函数、getter和setter方法、glow()方法
     public Wood(String name,int ID,double price, double length, double width, double thickness,LocalDate date,String origin,int stock) {
         this.name = name;
         super.setID(ID);
-        super.setUnitprice(price);
+        this.unitprice = price;
+        super.setUnitprice(unitprice);
         this.length = length;
         this.width = width;
         this.thickness = thickness;
@@ -26,8 +30,10 @@ public class Wood extends Product {
         setType();
         dry();
         super.setDate(this.date);
+        this.stock = stock;
+        super.setUnitprice(unitprice);
         super.setStock(stock);
-        super.setTotalpricePrice(price*stock);
+        totalprice = price * stock;
     }
 
     /// get方法
@@ -36,6 +42,7 @@ public class Wood extends Product {
     }
     public void setDate(LocalDate date) {
         this.date = date;
+        setWaterness();
     }
     public String getName() {
         return name;
@@ -97,8 +104,26 @@ public class Wood extends Product {
     {
      this.origin = origin;
     }
-    public double getTotalpricePrice() {
-        double totalprice = super.getStock() * getunitprice();
-        return totalprice;
+
+
+    public double getUnitPrice() {
+        return unitprice;
     }
+
+    public int getTotalPrice() {
+
+        totalprice = (int)unitprice * stock;
+        return (int)totalprice;
+    }
+    public void setunitprice(double unitprice) {
+        this.unitprice = unitprice;
+    }
+
+    @Override
+    public void setStock(int stock) {
+        super.setStock(stock);
+        this.stock = stock;
+    }
+
+
 }

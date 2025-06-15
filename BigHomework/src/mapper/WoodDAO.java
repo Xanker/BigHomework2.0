@@ -15,19 +15,22 @@ public class WoodDAO extends ProductDAO<Wood> {
 
     public void insert(Wood wood) throws SQLException {
 
-        String sql = "INSERT INTO wood (id, wood_type, origin, grade, length, width, height, purchday) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)";
+        insertProductTable(wood);
+        String sql = "INSERT INTO wood (id, wood_type, origin, grade, length, width, height, purchday,price,stock) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?)";
 
 
         PreparedStatement ps = connection.prepareStatement(sql);
         ps.setInt(1, wood.getID());
         ps.setString(2, wood.getType());
         ps.setString(3, wood.getOrigin());
-        ps.setDouble(5, wood.getWaterness());
-        ps.setDouble(6, wood.getLength());
-        ps.setDouble(7, wood.getWidth());
-        ps.setDouble(8, wood.getThickness());
-        ps.setDate(9, Date.valueOf(wood.getDate()));
+        ps.setDouble(4, wood.getWaterness());
+        ps.setDouble(5, wood.getLength());
+        ps.setDouble(6, wood.getWidth());
+        ps.setDouble(7, wood.getThickness());
+        ps.setDate(8, Date.valueOf(wood.getDate()));
+        ps.setDouble(9,wood.getUnitPrice());
+        ps.setInt(10, wood.getStock());
 
         ps.executeUpdate();
     }
@@ -49,9 +52,9 @@ public class WoodDAO extends ProductDAO<Wood> {
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, wood.getName());
             ps.setString(2, wood.getType());
-            ps.setDouble(3, wood.getTotalPrice());
+            ps.setDouble(3, wood.getUnitPrice());
             ps.setString(4, wood.getDescription());
-            ps.setInt(5, getStock(wood));
+            ps.setInt(5, wood.getStock());
             ps.setInt(6, wood.getID());
 
             int rowsAffected = ps.executeUpdate();
@@ -61,7 +64,7 @@ public class WoodDAO extends ProductDAO<Wood> {
 
     public boolean update1(Wood wood) throws SQLException {
 
-        String url1 = "UPDATE fruit SET wood_type = ? ,origin = ?, grade = ?, length = ?, width = ? , thickness = ?, purchday = ?,price =? WHERE id = ?";
+        String url1 = "UPDATE wood SET wood_type = ? ,origin = ?, grade = ?, length = ?, width = ? , height = ?, purchday = ?,price =? ,stock = ? WHERE id = ?";
         PreparedStatement ps = connection.prepareStatement(url1);
 
 
@@ -71,11 +74,11 @@ public class WoodDAO extends ProductDAO<Wood> {
         ps.setDouble(4, wood.getLength());
         ps.setDouble(5, wood.getWidth());
         ps.setDouble(6, wood.getThickness());
-        ps.setDate(6, java.sql.Date.valueOf(wood.getDate()));
-        ps.setDouble(7, wood.getTotalPrice());
+        ps.setDate(7, java.sql.Date.valueOf(wood.getDate()));
+        ps.setDouble(8, wood.getTotalPrice());
+        ps.setInt(9, wood.getStock());
 
-
-        ps.setInt(8, wood.getID());
+        ps.setInt(10, wood.getID());
 
         int rowsAffected = ps.executeUpdate();
         return rowsAffected > 0;
@@ -83,8 +86,9 @@ public class WoodDAO extends ProductDAO<Wood> {
 
     private int getStock(Wood wood) {
         // 这里需要从 Inventory 中获取库存数量
-        return 0; // 暂时返回0，需要根据实际情况修改
+        return wood.getStock();
     }
+
 }
 
 

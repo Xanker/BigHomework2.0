@@ -28,10 +28,10 @@ public class Fruit extends Product {
         this.unitPrice = unitPrice;
         setType();
         calculateTotalPrice();  // 计算总价
-        super.setUnitprice(this.unitPrice);
+
         super.setDate(this.date);
         super.setStock((int) weight);
-        super.setTotalpricePrice(totalPrice);
+        totalPrice = weight * unitPrice;
         glow();
     }
 
@@ -72,7 +72,9 @@ public class Fruit extends Product {
 
     public void setWeight(double weight) {
         this.weight = weight;
-        calculateTotalPrice();  // 重量变更时重新计算价格
+        calculateTotalPrice();
+        super.setStock((int)weight);
+        totalPrice = unitPrice * weight;// 重量变更时重新计算价格
     }
 
     public String getUnit() {
@@ -100,7 +102,8 @@ public class Fruit extends Product {
         return maturity;
     }
 
-    public void setType() {
+    public void setType()
+    {
         type = getClass().getSimpleName();
     }
 
